@@ -1,0 +1,91 @@
+% Chapter Template
+
+\chapter{Applications}
+
+\label{Chapter7} % Change X to a consecutive number; for referencing this chapter elsewhere, use \ref{ChapterX}
+
+\lhead{Chapter 7. \emph{Applications}}
+\section{Power Dissipation in Steady State}
+    The calculations in this section are relevant for certain applications, which will be discussed later.
+\subsection{Calculations}
+    The current in steady state in the time interval $nT \le t \le nT + \alpha T$ is given by, 
+    \begin{align*}
+               I_{1} = \frac{A}{R} + \brak{I_{cy} - \frac{A}{R}}e^{\frac{-Rt}{L}}
+    \end{align*}
+    where $I_{cy} =\frac{A}{R}e^{\frac{-RT}{L}}\brak{\frac{e^{\frac{R\alpha T}{L}} - 1}{1-e^{\frac{-RT}{L}}}}
+ $
+    Energy dissipated in this interval is given by, 
+    \begin{align*}
+        E_1 &= \int_{0}^{\alpha T} I_1^2R dt\\
+        &= \int_0^{\alpha T}\brak{\frac{A}{R} + \brak{I_{cy} - \frac{A}{R}}e^{\frac{-Rt}{L}}}^2 R\\
+    \end{align*}
+    Computing the integral, 
+    \begin{align*}
+        E_1 = \frac{A^2}{R} \alpha T + 2A \left(I_{cy} - \frac{A}{R}\right) \frac{L}{R} \left(1 - e^{\frac{-R\alpha T}{L}}\right) + \left(I_{cy} - \frac{A}{R}\right)^2 \frac{L}{2} \left(1 - e^{\frac{-2R\alpha T}{L}}\right)
+    \end{align*}
+    Coming to the rest of the cycle, the current is given by
+    \begin{align*}
+        I_{2} = I_{\alpha T}e^{\frac{-R\brak{t-\alpha T}}{L}}\\
+    \end{align*}
+    where $I_{\alpha T} =  \frac{A}{R} + \brak{I_{cy} - \frac{A}{R}}e^{\frac{-R\alpha T}{L}}
+ $
+ Again the power dissipated in the portion of the cycle is given by, 
+ \begin{align*}
+    E_2 &= \int_{0}^{\alpha T} I_2^2R dt\\
+    &= \int_{0}^{\alpha T} \brak{I_{\alpha T}e^{\frac{-R\brak{t-\alpha T}}{L}}}^2R dt\\
+ \end{align*}
+ On computing the integral we get, 
+ \begin{align*}
+     E_2 = \frac{L}{2} I_{\alpha T}^2 \left(1 - e^{\frac{-2R\alpha T}{L}}\right)
+ \end{align*}
+ So the net power dissipated is $E_{net} = E_1 + E_2$.
+ \subsection{Efficiency}
+ Efficiency can be calculated using, 
+ \begin{align*}
+     \eta = \frac{\text{energy dissipated in one cycle}}{\text{energy supplied by source in one cycle}}
+ \end{align*}
+ where,
+ \begin{align*}
+    \text{Energy supplied by source in one cycle is} = A \alpha T
+ \end{align*}
+ \subsection{Results}
+ It is worthy to take note here that for some values of the parameters the efficiency is quite high, 
+ \begin{verbatim}
+Amplitude = 10
+alpha = 0.7
+Time Period = 1e-06
+Resistance = 10
+Inductance = 1e-06
+Efficiency = 0.8645496088953908    
+ \end{verbatim}
+This efficiency combined with smaller deviation size is ideal to use the circuit as a DC-DC converter, which the next topic of discussion. 
+\section{Application as DC-DC converters}
+The circuit under inspection has some really direct use cases in the world of power electronics, namely \textbf{Buck Converters}.
+\subsection{DC-DC Converters}
+It is of critical importance to be able to change a supply DC voltage to different (higher or lower) DC value which is required for the operation of other systems. For example, PSUs in regular computers can provide DC 3.3, 5 and 12V DC voltage rails, but many modern microprocessors operate at voltages of the order of 1.83 V. So DC converters see use in the VRMs (Voltage Regulator Modules) of most modern motherboads.
+\subsection{Design}
+Buck converters is a DC-DC converter, which provides high efficiency and low ripple current. The converter is realized in the following form, 
+\begin{figure}[!ht]
+\centering
+\resizebox{0.8\textwidth}{!}{%
+\begin{circuitikz}
+\tikzstyle{every node}=[font=\LARGE]
+\draw (5.5,14.75) to[Tnmos, transistors/scale=1.02] (3,14.75);
+\draw (3,14.75) to[american voltage source] (3,10.75);
+\draw (3,10.75) to[short] (7.5,10.75);
+\draw (7.5,10.75) to[D] (7.5,14.75);
+\draw (7.5,14.75) to[L ] (12.5,14.75);
+\draw (12.5,14.75) to[R] (12.5,11);
+\draw (7.5,10.75) to[short] (12.5,10.75);
+\draw (12.5,10.75) to[short] (12.5,11.25);
+\draw (5.5,14.75) to[short] (7.5,14.75);
+\draw (11,14.75) to[C] (11,10.75);
+\node [font=\LARGE] at (1.5,12.75) {$V_s$};
+\draw (12.5,14.75) to[short, -o] (14.25,14.75) ;
+\draw (12.5,10.75) to[short, -o] (14.25,10.75) ;
+\node [font=\LARGE] at (14.5,12.75) {$V_o$};
+\end{circuitikz}
+}%
+\caption{Step Down Buck Converter}
+\end{figure}
+The MOSFET will act as a switch, switching at some very high frequency (typically 100 kHz to a few MHz). The current ripple is mellowed out even further by the large capacitance. So our analysis has left us with all the tools required to build an efficient buck converter- with low ripple current around our desired target voltage and minimal losses of energy - with real life use.
