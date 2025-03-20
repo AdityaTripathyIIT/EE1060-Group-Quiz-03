@@ -61,7 +61,7 @@ func SolveRK4(filename string) {
 
 // Parareal Algorithm
 func Parareal(filename string) {
-	runtime.GOMAXPROCS(runtime.NumCPU())
+	runtime.GOMAXPROCS(runtime.NumCPU()) // Command Go runtime to use all cpu threads
 
 	var wg sync.WaitGroup
 	var mu sync.Mutex
@@ -69,13 +69,15 @@ func Parareal(filename string) {
 	pool := sync.Pool{
 		New: func() interface{} { return make([]float64, N+1) },
 	}
-	i0 := pool.Get().([]float64)
-	i1 := pool.Get().([]float64)
+	i0 := pool.Get().([]float64) // the points on the graph from previous pass
+	i1 := pool.Get().([]float64) // newly updated points
 	t := pool.Get().([]float64)
 	defer pool.Put(i0)
 	defer pool.Put(i1)
 	defer pool.Put(t)
 
+// Define the number of points for coarse step
+//(which will be refined and be the final points on graph) 
 	for step := 0; step <= N; step++ {
 		t[step] = float64(step) * dt
 	}
@@ -87,9 +89,10 @@ func Parareal(filename string) {
 
 	// Parareal Iterations
 	for k := 0; k < K; k++ {
+    // The implementation takes 10 coarse intervals in chunks to create threads
 		wg.Add(N / chunkSize)
 		for step := 0; step < N; step += chunkSize {
-			go func(start int) {
+			go func(start int) { // start of a new goroutine
 				defer wg.Done()
 				for j := start; j < start+chunkSize && j < N; j++ {
 					fine := i0[j]
@@ -97,7 +100,8 @@ func Parareal(filename string) {
 					for m := 0; m < M; m++ {
 						fine = RK4Step(fine, t[j]+float64(m)*fine_dt, fine_dt)
 					}
-
+          //Since multiple threads are writing to this piece of memory(i1), Mutex is used to
+          //avoid race conditions.
 					mu.Lock()
 					i1[j+1] = fine + i0[j+1] - i0[j] 
 					mu.Unlock()
